@@ -85,5 +85,40 @@ window.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-    setClock('.timer',deadLine)
+    setClock('.timer',deadLine);
+
+    //Modal
+    const modal = document.querySelector('.modal'),
+    modalTrigger = document.querySelectorAll('[data-modal]'),
+    modalClose = document.querySelector('.modal__close');
+
+    function closeModal(elem) {
+        elem.classList.add('hide');
+        elem.classList.remove('show');
+        document.body.style.overflow = '';
+    };
+
+    modalTrigger.forEach((item)=>{
+        item.addEventListener('click', ()=>{
+            modal.classList.add('show');
+            modal.classList.remove('hide');
+            document.body.style.overflow = 'hidden';
+        }); 
+    });
+
+    modalClose.addEventListener('click', ()=>{
+       closeModal(modal);
+    });
+
+    modal.addEventListener('click',(e) => {
+        if(e.target===modal) {
+            closeModal(modal);
+        }
+    });
+
+    document.addEventListener('keydown', (e)=>{
+        if(e.code === "Escape" && modal.classList.contains('show')){
+            closeModal(modal);
+        }
+    });
 });
