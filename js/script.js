@@ -96,13 +96,18 @@ window.addEventListener('DOMContentLoaded', () => {
         elem.classList.add('hide');
         elem.classList.remove('show');
         document.body.style.overflow = '';
-    };
+    }
+
+    function openModal(elem) {
+        elem.classList.add('show');
+        elem.classList.remove('hide');
+        document.body.style.overflow = 'hidden';
+        clearInterval(modalTimer);
+    }
 
     modalTrigger.forEach((item)=>{
         item.addEventListener('click', ()=>{
-            modal.classList.add('show');
-            modal.classList.remove('hide');
-            document.body.style.overflow = 'hidden';
+            openModal(modal);
         }); 
     });
 
@@ -121,4 +126,15 @@ window.addEventListener('DOMContentLoaded', () => {
             closeModal(modal);
         }
     });
+
+    const modalTimer = setTimeout(openModal,3000, modal);
+
+    function showModalByScroll(){
+        if(window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight){
+            openModal();
+            window.removeEventListener('scroll', showModalByScroll);
+        }
+    }
+
+    window.addEventListener('scroll', showModalByScroll);
 });
