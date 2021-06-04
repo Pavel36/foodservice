@@ -90,8 +90,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     //Modal
     const modal = document.querySelector('.modal'),
-        modalTrigger = document.querySelectorAll('[data-modal]'),
-        modalClose = document.querySelector('.modal__close');
+        modalTrigger = document.querySelectorAll('[data-modal]')
 
     function closeModal(elem) {
         elem.classList.add('hide');
@@ -112,12 +111,8 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    modalClose.addEventListener('click', () => {
-        closeModal(modal);
-    });
-
     modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
+        if (e.target === modal || e.target.getAttribute('data-close') == '') {
             closeModal(modal);
         }
     });
@@ -128,16 +123,16 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // const modalTimer = setTimeout(openModal, 3000, modal);
+    const modalTimer = setTimeout(openModal, 300000, modal);
 
-    // function showModalByScroll() {
-    //     if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
-    //         openModal();
-    //         window.removeEventListener('scroll', showModalByScroll);
-    //     }
-    // }
+    function showModalByScroll() {
+        if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
+            openModal();
+            window.removeEventListener('scroll', showModalByScroll);
+        }
+    }
 
-    // window.addEventListener('scroll', showModalByScroll);
+    window.addEventListener('scroll', showModalByScroll);
 
     //Cards
 
@@ -160,12 +155,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
         render() {
             const element = document.createElement('div');
-            if(this.classes.length===0)
-            {
+            if (this.classes.length === 0) {
                 this.element = 'menu__item';
                 element.classList.add(this.element);
             } else {
-                this.classes.forEach((className)=>{
+                this.classes.forEach((className) => {
                     element.classList.add(className);
                 });
             }
@@ -190,8 +184,7 @@ window.addEventListener('DOMContentLoaded', () => {
         'Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!',
         9,
         '.menu .container'
-    ).render(
-    );
+    ).render();
 
     new Card(
         "img/tabs/elite.jpg",
@@ -200,8 +193,7 @@ window.addEventListener('DOMContentLoaded', () => {
         'В меню “Премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!',
         14,
         '.menu .container'
-    ).render(
-    );
+    ).render();
 
     new Card(
         "img/tabs/post.jpg",
@@ -210,6 +202,80 @@ window.addEventListener('DOMContentLoaded', () => {
         'Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.',
         27,
         '.menu .container'
-    ).render(
-    );
+    ).render();
+
+    //Forms
+
+    const message = {
+        loading: 'img/form/spinner.svg',
+        success: 'thanks, we will call you',
+        failure: 'failed'
+    };
+
+    const forms = document.querySelectorAll('form');
+
+    forms.forEach((item) => {
+        postData(item);
+    });
+
+    function postData(form) {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const statusMessage = document.createElement('img');
+            statusMessage.src= message.loading;
+            statusMessage.style.cssText = `
+                display:block;
+                margin:0 auto;
+            `;
+            form.insertAdjacentElement('afterend',statusMessage);
+
+            const request = new XMLHttpRequest();
+            request.open('POST', 'server.php');
+
+            request.setRequestHeader('Content-type', 'application/json');
+            const formData = new FormData(form);
+
+            const obj = {};
+            formData.forEach((value, key) => {
+                obj[key] = value;
+            });
+
+            const json = JSON.stringify(obj);
+
+            request.send(json);
+            request.addEventListener('load', () => {
+                if (request.status === 200) {
+                    console.log(request.response);
+                    showThanksModal(message.success);
+                    form.reset();
+                    statusMessage.remove();
+                } else {
+                    showThanksModal(message.failure);
+                }
+            });
+        });
+    }
+
+    function showThanksModal(message) {
+        const oldModal = document.querySelector('.modal__dialog'); 
+        oldModal.classList.add('hide');
+        openModal(modal);
+        const thanksModal = document.createElement('div');
+        thanksModal.classList.add('modal__dialog');
+        thanksModal.innerHTML = `
+        <div class="modal__content">
+            <div class="modal__close" data-close>×</div>
+            <div class="modal__title">${message}</div>
+        </div>
+        `;
+        document.querySelector('.modal').append(thanksModal);
+        setTimeout(()=>{
+            thanksModal.remove();
+            oldModal.classList.remove('hide');
+            oldModal.classList.add('show');
+            closeModal();
+        }, 4000);
+    }
+
 });
